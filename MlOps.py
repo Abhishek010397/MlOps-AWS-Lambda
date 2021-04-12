@@ -1,5 +1,6 @@
 import boto3
 import time
+import os
 
 
 
@@ -54,10 +55,13 @@ def getJobResults(jobId):
 
     return pages
 
-s3BucketName = 's3-bucket-name'
-documentName= 'example.pdf'
+s3BucketName = ''
+destbucketName= ''
+documentName= '.pdf'
+createdS3Document = 'myTextextracted'
 
 jobId = startJob(s3BucketName, documentName)
+pdfText = ''
 print("Started job with id: {}".format(jobId))
 if (isJobComplete(jobId)):
     response = getJobResults(jobId)
@@ -67,4 +71,12 @@ if (isJobComplete(jobId)):
 for resultPage in response:
     for item in resultPage["Blocks"]:
         if item["BlockType"] == "LINE":
-            object = print('\033[94m' + item["Text"] + '\033[0m')
+            #print('\033[94m' + item["Text"] + '\033[0m')
+            pdfText += item["Text"] + '\n'
+
+client = boto3.client('s3')
+
+
+generateFilePath = os.path.splitext(createdS3Document)[0] + '.txt'
+client.put_object(Body=pdfText, Bucket=destbucketName, Key=generateFilePath)
+print('Generated ' + generateFilePath)
