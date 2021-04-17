@@ -38,8 +38,7 @@ def split_pdf(myfile):
 def lambda_handler(event, context):
     try:
         print(event)
-        #myfile = event['Records'][0]['s3']['object']['key']
-        myfile = 'CATASTROPHIC-DEVASTATION-OF-THE-ANCIENT-ONES.pdf'
+        myfile = event['Records'][0]['s3']['object']['key']
         print(myfile)
         download_to_s3(myfile)
         split_pdf(myfile)
