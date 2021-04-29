@@ -1,5 +1,11 @@
 package handler;
+import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.regions.Regions;
+import com.amazonaws.services.lambda.AWSLambda;
+import com.amazonaws.services.lambda.AWSLambdaClientBuilder;
+import com.amazonaws.services.lambda.model.InvokeRequest;
+import com.amazonaws.services.lambda.model.InvokeResult;
+import com.amazonaws.services.lambda.model.ServiceException;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.s3.AmazonS3;
@@ -16,7 +22,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
+import javax.imageio.ImageIO;
 
 public class HandlerJsonData {
     public String handleRequest(Map<String, Object> event, Context context) throws IOException {
@@ -61,6 +69,23 @@ public class HandlerJsonData {
                                  "extracted-image/" + KeyValue + ".png",
                                  new File("/tmp/" + KeyValue + ".png")
                          );
+                         String fileName  = KeyValue + ".png";
+                         String functionName = "fac-decline-worker-poc";
+                         InvokeRequest invokeRequest = new InvokeRequest()
+                                 .withFunctionName(functionName)
+                                 .withPayload("{\"Bucketname\": bucket,\"FolderName\": \"extracted-image/\",\"FileName\": fileName}");
+                         InvokeResult invokeResult = null;
+                         try {
+                             AWSLambda awsLambda = AWSLambdaClientBuilder.standard()
+                                     .withCredentials(new ProfileCredentialsProvider())
+                                     .withRegion(Regions.US_EAST_1).build();
+                             invokeResult = awsLambda.invoke(invokeRequest);
+                             String res = new String(invokeResult.getPayload().array(), StandardCharsets.UTF_8);
+                             //write out the response value
+                             System.out.println(res);
+                         } catch (ServiceException e) {
+                             System.out.println(e);
+                         }
                      }
                  } catch (IOException e) {
                  System.err.println("Exception while trying to create pdf document - " + e);
