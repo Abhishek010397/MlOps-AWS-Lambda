@@ -1,5 +1,4 @@
 package handler;
-import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.lambda.AWSLambda;
 import com.amazonaws.services.lambda.AWSLambdaClientBuilder;
@@ -24,12 +23,12 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import javax.imageio.ImageIO;
 
 public class HandlerJsonData {
     public String handleRequest(Map<String, Object> event, Context context) throws IOException {
         String bucket;
         String folder;
+        String newFolder;
         try {
             final AmazonS3 s3client = AmazonS3ClientBuilder
                     .standard()
@@ -39,6 +38,7 @@ public class HandlerJsonData {
             JSONObject myjson = new JSONObject(event);
             bucket = myjson.getString("Bucketname");
             folder = myjson.getString("FolderName");
+            newFolder = myjson.getString("newfolder");
             JSONArray myarray = myjson.getJSONArray("splitfiles");
             List<String> pdfs = new ArrayList<>();
             int size = myarray.length();
@@ -64,20 +64,24 @@ public class HandlerJsonData {
                          ImageIOUtil.writeImage(img, "/tmp/" + KeyValue + ".png", 300);
                          System.out.println("Output KeyValue is: "+KeyValue+".png");
                          document.close();
-
+                         String key1 = newFolder+"-img/";
+                         System.out.println("S3KeyValue: "+key1);
                          s3client.putObject(
                                  bucket,
-                                 "extracted-image/" + KeyValue + ".png",
+                                 key1+ KeyValue + ".png",
                                  new File("/tmp/" + KeyValue + ".png")
                          );
                          String fileName  = KeyValue + ".png";
-                         String functionName = "poc-lambda-worker";
+                         String functionName = "Lambda-Worker";
+                         String ffolder = newFolder+"-img";
+                         System.out.println("New Folder Value: "+ffolder);
                          InvokeRequest invokeRequest = new InvokeRequest()
                                  .withFunctionName(functionName)
                                  .withPayload("{\n" +
-                                         " \"Bucketname \": \""+bucket+"\",\n" +
-                                         " \"FolderName \": \"extracted-image/\",\n" +
-                                         " \"FileName\": \""+fileName+"\"\n"+
+                                         " \"Bucketname\": \""+bucket+"\",\n" +
+                                         " \"FolderName\": \""+ffolder+"\",\n" +
+                                         " \"FileName\": \""+fileName+"\",\n"+
+                                         " \"NewFolder\": \""+newFolder+"\"\n"+
                                          "}");
                          InvokeResult invokeResult = null;
                          try {
@@ -119,7 +123,8 @@ Input Json:-
     .....................,
     .....................,
     "document-page...n.pdf"
-  ]
+  ],
+ "newfolder": "next_234"
 }
            
           
