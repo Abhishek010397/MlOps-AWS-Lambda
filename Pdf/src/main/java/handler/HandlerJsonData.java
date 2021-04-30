@@ -64,21 +64,27 @@ public class HandlerJsonData {
                          ImageIOUtil.writeImage(img, "/tmp/" + KeyValue + ".png", 300);
                          System.out.println("Output KeyValue is: "+KeyValue+".png");
                          document.close();
+
                          s3client.putObject(
                                  bucket,
                                  "extracted-image/" + KeyValue + ".png",
                                  new File("/tmp/" + KeyValue + ".png")
                          );
                          String fileName  = KeyValue + ".png";
-                         String functionName = "fac-decline-worker-poc";
+                         String functionName = "poc-lambda-worker";
                          InvokeRequest invokeRequest = new InvokeRequest()
                                  .withFunctionName(functionName)
-                                 .withPayload("{\"Bucketname\": bucket,\"FolderName\": \"extracted-image/\",\"FileName\": fileName}");
+                                 .withPayload("{\n" +
+                                         " \"Bucketname \": \""+bucket+"\",\n" +
+                                         " \"FolderName \": \"extracted-image/\",\n" +
+                                         " \"FileName\": \""+fileName+"\"\n"+
+                                         "}");
                          InvokeResult invokeResult = null;
                          try {
-                             AWSLambda awsLambda = AWSLambdaClientBuilder.standard()
-                                     .withCredentials(new ProfileCredentialsProvider())
-                                     .withRegion(Regions.US_EAST_1).build();
+                             AWSLambda awsLambda = AWSLambdaClientBuilder
+                                     .standard()
+                                     .withRegion(Regions.US_EAST_1)
+                                     .build();
                              invokeResult = awsLambda.invoke(invokeRequest);
                              String res = new String(invokeResult.getPayload().array(), StandardCharsets.UTF_8);
                              //write out the response value
@@ -97,4 +103,27 @@ public class HandlerJsonData {
         return null;
     }
 }
+
+
+Input Json:-
+{
+  "Bucketname": "lambdatextractbucket",
+  "FolderName": "extracted-pdf/",
+  "splitfiles": [
+    "document-page14.pdf",
+    "document-page15.pdf",
+    "document-page16.pdf",
+    .....................,
+    .....................,
+    .....................,
+    .....................,
+    .....................,
+    "document-page...n.pdf"
+  ]
+}
+           
+          
+
+
+         
 
