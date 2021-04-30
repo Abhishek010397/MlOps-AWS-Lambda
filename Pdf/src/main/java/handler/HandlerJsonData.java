@@ -72,7 +72,17 @@ public class HandlerJsonData {
                                  new File("/tmp/" + KeyValue + ".png")
                          );
                          String fileName  = KeyValue + ".png";
-                         String functionName = "Lambda-Worker";
+                         /**
+                         String ffolder = newFolder+"-img";
+                         System.out.println("New Folder: "+ffolder);
+                         String Payload = "{\n" +
+                                 " \"Bucketname \": \""+bucket+"\",\n" +
+                                 " \"FolderName \": \""+ffolder+"\",\n" +
+                                 " \"FileName\": \""+fileName+"\",\n"+
+                                 " \"NewFolder\": \""+newFolder+"\"\n"+
+                                 "}";
+                         System.out.println(Payload);**/
+                         String functionName = "fac-decline-worker-poc";
                          String ffolder = newFolder+"-img";
                          System.out.println("New Folder Value: "+ffolder);
                          InvokeRequest invokeRequest = new InvokeRequest()
@@ -107,28 +117,4 @@ public class HandlerJsonData {
         return null;
     }
 }
-
-
-Input Json:-
-{
-  "Bucketname": "lambdatextractbucket",
-  "FolderName": "extracted-pdf/",
-  "splitfiles": [
-    "document-page14.pdf",
-    "document-page15.pdf",
-    "document-page16.pdf",
-    .....................,
-    .....................,
-    .....................,
-    .....................,
-    .....................,
-    "document-page...n.pdf"
-  ],
- "newfolder": "next_234"
-}
-           
-          
-
-
-         
 
