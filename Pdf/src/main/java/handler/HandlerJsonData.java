@@ -29,6 +29,7 @@ public class HandlerJsonData {
         String bucket;
         String folder;
         String newFolder;
+        System.setProperty("pdfbox.fontcache", "/tmp");
         try {
             final AmazonS3 s3client = AmazonS3ClientBuilder
                     .standard()
@@ -72,16 +73,6 @@ public class HandlerJsonData {
                                  new File("/tmp/" + KeyValue + ".png")
                          );
                          String fileName  = KeyValue + ".png";
-                         /**
-                         String ffolder = newFolder+"-img";
-                         System.out.println("New Folder: "+ffolder);
-                         String Payload = "{\n" +
-                                 " \"Bucketname \": \""+bucket+"\",\n" +
-                                 " \"FolderName \": \""+ffolder+"\",\n" +
-                                 " \"FileName\": \""+fileName+"\",\n"+
-                                 " \"NewFolder\": \""+newFolder+"\"\n"+
-                                 "}";
-                         System.out.println(Payload);**/
                          String functionName = "fac-decline-worker-poc";
                          String ffolder = newFolder+"-img";
                          System.out.println("New Folder Value: "+ffolder);
@@ -101,7 +92,6 @@ public class HandlerJsonData {
                                      .build();
                              invokeResult = awsLambda.invoke(invokeRequest);
                              String res = new String(invokeResult.getPayload().array(), StandardCharsets.UTF_8);
-                             //write out the response value
                              System.out.println(res);
                          } catch (ServiceException e) {
                              System.out.println(e);
@@ -110,6 +100,12 @@ public class HandlerJsonData {
                  } catch (IOException e) {
                  System.err.println("Exception while trying to create pdf document - " + e);
                  }
+                if(newFile.delete()){
+                    System.out.println("File deleted successfully");
+                }
+                else {
+                    System.out.println("File not deleted");
+                }
             }
             }catch (JSONException e) {
             throw new JSONException(e);
